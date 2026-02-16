@@ -1,0 +1,33 @@
+name: security-pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+
+jobs:
+  build_test:
+    uses: ./.github/workflows/build-test.yml
+
+  sast:
+    needs: build_test
+    uses: ./.github/workflows/sast.yml
+
+  dependency_scan:
+    needs: build_test
+    uses: ./.github/workflows/dependency-scan.yml
+
+  secrets_scan:
+    needs: build_test
+    uses: ./.github/workflows/secrets-scan.yml
+
+  dast:
+    needs: build_test
+    uses: ./.github/workflows/dast.yml
+    with:
+      target_url: http://127.0.0.1:8000
